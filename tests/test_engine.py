@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from frugal_ml.evaluator import EvalResult, evaluate, train_holdout_split
-from frugal_ml.proxy.linear import LogisticRegressionProxy
+from thrifty_ml.evaluator import EvalResult, evaluate, train_holdout_split
+from thrifty_ml.proxy.linear import LogisticRegressionProxy
 
 
 def _two_cluster_embeddings(n: int = 200, dim: int = 64, seed: int = 0) -> np.ndarray:
@@ -62,7 +62,7 @@ def test_train_holdout_split_no_overlap():
 
 
 def test_empty_df_raises():
-    from frugal_ml.engine import Engine
+    from thrifty_ml.engine import Engine
     engine = Engine(
         prompt="test",
         llm="fake/model",
@@ -74,7 +74,7 @@ def test_empty_df_raises():
 
 def test_ml_classify_empty_classes_raises():
     import pandas as pd
-    from frugal_ml import ml_classify
+    from thrifty_ml import ml_classify
     with pytest.raises(ValueError, match="classes"):
         ml_classify(
             pd.DataFrame({"text": ["a"]}),
@@ -104,8 +104,8 @@ def test_evaluate_average_uses_union_of_labels():
 
 def test_proxy_save_load_roundtrip(tmp_path):
     """Proxy.save() writes a sidecar; Proxy.load() restores predict() capability."""
-    from frugal_ml import Proxy
-    from frugal_ml.embeddings import EmbeddingBackend
+    from thrifty_ml import Proxy
+    from thrifty_ml.embeddings import EmbeddingBackend
 
     class FixedBackend(EmbeddingBackend):
         model_id = "fixed-32"
@@ -114,7 +114,7 @@ def test_proxy_save_load_roundtrip(tmp_path):
 
     # Build proxy without a real Engine fit — stub _proxy_model and _embedding_backend.
     # Use the public constructor path via LogisticRegressionProxy directly.
-    from frugal_ml.proxy.linear import LogisticRegressionProxy
+    from thrifty_ml.proxy.linear import LogisticRegressionProxy
     rng = np.random.default_rng(0)
     X = np.vstack([
         rng.normal(loc=-1.0, size=(50, 32)).astype(np.float32),

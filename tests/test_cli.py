@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 from typer.testing import CliRunner
 
-from frugal_ml.cli import app
+from thrifty_ml.cli import app
 
 runner = CliRunner()
 
@@ -29,8 +29,8 @@ def mock_pipeline(monkeypatch):
     def fake_classify(df, classes, **kwargs):
         return np.array([classes[i % len(classes)] for i in range(len(df))])
 
-    monkeypatch.setattr("frugal_ml.ml_filter", fake_filter)
-    monkeypatch.setattr("frugal_ml.ml_classify", fake_classify)
+    monkeypatch.setattr("thrifty_ml.ml_filter", fake_filter)
+    monkeypatch.setattr("thrifty_ml.ml_classify", fake_classify)
 
 
 def test_filter_command(tmp_path, mock_pipeline):
@@ -52,7 +52,7 @@ def test_filter_command(tmp_path, mock_pipeline):
     assert out_path.exists()
     out_df = pd.read_parquet(out_path)
     assert len(out_df) > 0
-    assert "_frugal_mask" in out_df.columns
+    assert "_thrifty_mask" in out_df.columns
 
 
 def test_classify_command(tmp_path, mock_pipeline):

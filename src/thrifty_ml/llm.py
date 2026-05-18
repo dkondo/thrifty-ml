@@ -7,8 +7,8 @@ from typing import Literal
 
 import litellm
 
-from frugal_ml._utils import _litellm_call_with_retry, make_semaphore
-from frugal_ml import cache as _cache
+from thrifty_ml._utils import _litellm_call_with_retry, make_semaphore
+from thrifty_ml import cache as _cache
 
 litellm.suppress_debug_info = True
 

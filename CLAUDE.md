@@ -1,4 +1,4 @@
-# frugal-ml
+# thrifty-ml
 
 ## gstack
 

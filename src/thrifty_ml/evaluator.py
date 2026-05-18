@@ -7,7 +7,7 @@ import numpy as np
 from sklearn.metrics import f1_score
 from sklearn.model_selection import StratifiedShuffleSplit
 
-from frugal_ml.proxy.base import ProxyModel
+from thrifty_ml.proxy.base import ProxyModel
 
 
 @dataclass

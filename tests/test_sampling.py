@@ -3,7 +3,7 @@ import warnings
 import pandas as pd
 import pytest
 
-from frugal_ml.sampling import random_sample
+from thrifty_ml.sampling import random_sample
 
 
 def _df(n: int) -> pd.DataFrame:

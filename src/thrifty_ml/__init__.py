@@ -7,13 +7,13 @@ from typing import Literal
 import numpy as np
 import pandas as pd
 
-from frugal_ml.embeddings import EmbeddingBackend, LiteLLMEmbeddingBackend
-from frugal_ml.engine import Engine
-from frugal_ml.proxy.base import ProxyModel
+from thrifty_ml.embeddings import EmbeddingBackend, LiteLLMEmbeddingBackend
+from thrifty_ml.engine import Engine
+from thrifty_ml.proxy.base import ProxyModel
 
 try:
     from importlib.metadata import version as _pkg_version, PackageNotFoundError
-    __version__ = _pkg_version("frugal-ml")
+    __version__ = _pkg_version("thrifty-ml")
 except Exception:
     __version__ = "dev"
 
@@ -52,7 +52,7 @@ def ml_filter(
         sample_size: Number of rows to LLM-label for proxy training.
         fallback_threshold: τ — if proxy F1 < 1.0 - τ, fall back to full LLM.
         max_concurrency: Max simultaneous LLM API calls.
-        cache_dir: Override default cache directory (~/.cache/frugal_ml/).
+        cache_dir: Override default cache directory (~/.cache/thrifty_ml/).
         seed: Random seed for sampling reproducibility.
 
     Returns:
@@ -156,7 +156,7 @@ class Proxy:
     def predict(self, df: pd.DataFrame, text_column: str) -> np.ndarray:
         if self._proxy_model is None:
             raise RuntimeError("Call fit() before predict().")
-        from frugal_ml.embeddings import embed_texts
+        from thrifty_ml.embeddings import embed_texts
         texts = df[text_column].tolist()
         X = embed_texts(texts, self._embedding_backend, self._cache_dir)
         return self._proxy_model.predict(X)
@@ -208,13 +208,13 @@ class Proxy:
         # Dispatch to the proxy type's own load() so each format is handled correctly
         # (joblib for sklearn, LightGBM booster text for lgbm).
         if proxy_type == "lgbm":
-            from frugal_ml.proxy.trees import LightGBMProxy
+            from thrifty_ml.proxy.trees import LightGBMProxy
             proxy_model: ProxyModel = LightGBMProxy.load(path)
         elif proxy_type == "svc":
-            from frugal_ml.proxy.linear import LinearSVCProxy
+            from thrifty_ml.proxy.linear import LinearSVCProxy
             proxy_model = LinearSVCProxy.load(path)
         else:
-            from frugal_ml.proxy.linear import LogisticRegressionProxy
+            from thrifty_ml.proxy.linear import LogisticRegressionProxy
             proxy_model = LogisticRegressionProxy.load(path)
 
         instance = cls.__new__(cls)

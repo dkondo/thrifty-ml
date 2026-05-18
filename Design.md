@@ -1,8 +1,8 @@
-# frugal-ml Design
+# thrifty-ml Design
 
 ## What it does
 
-frugal-ml replaces per-row LLM calls with lightweight ML classifiers ("proxy models") trained on text embeddings. Instead of asking an LLM to evaluate every row in a DataFrame, it:
+thrifty-ml replaces per-row LLM calls with lightweight ML classifiers ("proxy models") trained on text embeddings. Instead of asking an LLM to evaluate every row in a DataFrame, it:
 
 1. Labels a small sample (~1 000 rows) using the LLM.
 2. Embeds all rows with an embedding model.
@@ -12,14 +12,14 @@ frugal-ml replaces per-row LLM calls with lightweight ML classifiers ("proxy mod
 
 On large datasets this yields 100–1 000× cheaper and faster labeling with accuracy that matches the LLM within a configurable tolerance.
 
-The technique is described in [arXiv 2603.15970](https://arxiv.org/html/2603.15970v6) and is used inside Google's BigQuery `AI.IF` and AlloyDB accelerated functions. frugal-ml ports it to any Python DataFrame.
+The technique is described in [arXiv 2603.15970](https://arxiv.org/html/2603.15970v6) and is used inside Google's BigQuery `AI.IF` and AlloyDB accelerated functions. thrifty-ml ports it to any Python DataFrame.
 
 ---
 
 ## Architecture
 
 ```
-frugal_ml/
+thrifty_ml/
 ├── __init__.py          # Public API: ml_filter, ml_classify, Proxy, EmbeddingBackend
 ├── engine.py            # Engine — the orchestration core
 ├── sampling.py          # random_sample(): splits df into sample + remainder
@@ -136,9 +136,9 @@ Custom backends — sentence-transformers, pre-computed vectors, proprietary API
 
 ### Caching (`cache.py`)
 
-All embeddings and labels are cached in a `diskcache.FanoutCache` (8 SQLite shards, 60 s timeout) at `~/.cache/frugal_ml/` by default.
+All embeddings and labels are cached in a `diskcache.FanoutCache` (8 SQLite shards, 60 s timeout) at `~/.cache/thrifty_ml/` by default.
 
-Cache keys are namespaced by version: `frugal_ml/{VERSION}/...`
+Cache keys are namespaced by version: `thrifty_ml/{VERSION}/...`
 
 - **Embedding key**: `emb / sha256(text) / model_id`
 - **Label key**: `lbl / sha256(text) / sha256(prompt) / model_id / classes_key`
@@ -159,7 +159,7 @@ Cache keys are namespaced by version: `frugal_ml/{VERSION}/...`
 ## Public API
 
 ```python
-from frugal_ml import ml_filter, ml_classify, Proxy, EmbeddingBackend
+from thrifty_ml import ml_filter, ml_classify, Proxy, EmbeddingBackend
 
 # Online binary filter
 mask = ml_filter(
@@ -205,11 +205,11 @@ mask = ml_filter(df, ..., embedding_model=MyBackend())
 ## CLI
 
 ```
-frugal-ml filter   input.parquet --prompt "..." --text-col review --out mask.parquet
-frugal-ml classify input.parquet --prompt "..." --text-col review --classes a,b,c --out labels.parquet
-frugal-ml embed    input.parquet --text-col review --model text-embedding-3-small --out embeds.npy
-frugal-ml label    input.parquet --prompt "..." --text-col review --sample 1000 --out labels.parquet
-frugal-ml cache clear
+thrifty-ml filter   input.parquet --prompt "..." --text-col review --out mask.parquet
+thrifty-ml classify input.parquet --prompt "..." --text-col review --classes a,b,c --out labels.parquet
+thrifty-ml embed    input.parquet --text-col review --model text-embedding-3-small --out embeds.npy
+thrifty-ml label    input.parquet --prompt "..." --text-col review --sample 1000 --out labels.parquet
+thrifty-ml cache clear
 ```
 
 All commands accept `--llm`, `--embedding-model`, `--proxy`, `--cache-dir`, `--sample-size`, `--fallback-threshold`, `--max-concurrency`, `--seed`. Input formats: `.parquet`, `.csv`, `.json`, `.jsonl`.
@@ -234,18 +234,18 @@ All commands accept `--llm`, `--embedding-model`, `--proxy`, `--cache-dir`, `--s
 
 ## Advantages over the SQL approach (BigQuery AI.IF / AlloyDB)
 
-The paper's technique is implemented as SQL functions inside Google's data warehouse products — `AI.IF` in BigQuery and accelerated functions in AlloyDB. That surface imposes several constraints that frugal-ml removes.
+The paper's technique is implemented as SQL functions inside Google's data warehouse products — `AI.IF` in BigQuery and accelerated functions in AlloyDB. That surface imposes several constraints that thrifty-ml removes.
 
-**No infrastructure dependency.** The SQL approach requires data to be in BigQuery or AlloyDB, a GCP account, and quota. frugal-ml works on any DataFrame — pandas, a local parquet file, a CSV — with no cloud account required. The technique is available to anyone running Python.
+**No infrastructure dependency.** The SQL approach requires data to be in BigQuery or AlloyDB, a GCP account, and quota. thrifty-ml works on any DataFrame — pandas, a local parquet file, a CSV — with no cloud account required. The technique is available to anyone running Python.
 
-**Any LLM and any embedding provider.** BigQuery and AlloyDB are wired to specific Google models (Vertex AI / Gemini). frugal-ml uses LiteLLM as the adapter layer, so the same code path works with Anthropic, OpenAI, Bedrock, Vertex, a local Ollama instance, or any LiteLLM-supported provider. The embedding backend is similarly pluggable via the `EmbeddingBackend` ABC — you can bring pre-computed vectors, a fine-tuned sentence-transformer, or a proprietary embedding API.
+**Any LLM and any embedding provider.** BigQuery and AlloyDB are wired to specific Google models (Vertex AI / Gemini). thrifty-ml uses LiteLLM as the adapter layer, so the same code path works with Anthropic, OpenAI, Bedrock, Vertex, a local Ollama instance, or any LiteLLM-supported provider. The embedding backend is similarly pluggable via the `EmbeddingBackend` ABC — you can bring pre-computed vectors, a fine-tuned sentence-transformer, or a proprietary embedding API.
 
-**Offline / deploy-once mode.** SQL functions re-run the sample-label-train pipeline on each query invocation. frugal-ml's `Proxy` class separates `fit` from `predict`: you train once, serialize to disk (`proxy.joblib` + `.meta.json` sidecar), and deploy the classifier independently. Subsequent predictions make zero LLM calls and run at classifier speed (~0.1 ms / 1 000 rows for logistic regression).
+**Offline / deploy-once mode.** SQL functions re-run the sample-label-train pipeline on each query invocation. thrifty-ml's `Proxy` class separates `fit` from `predict`: you train once, serialize to disk (`proxy.joblib` + `.meta.json` sidecar), and deploy the classifier independently. Subsequent predictions make zero LLM calls and run at classifier speed (~0.1 ms / 1 000 rows for logistic regression).
 
-**Observability and control.** Inside a SQL function you cannot inspect intermediate results. In frugal-ml, `EvalResult` exposes `proxy_f1`, `llm_f1`, `use_proxy`, and `holdout_size` after every run. You can tune `fallback_threshold` explicitly, inspect the trained sklearn/LightGBM object, check holdout predictions, or step through the pipeline in a notebook. The SQL surface hides all of this.
+**Observability and control.** Inside a SQL function you cannot inspect intermediate results. In thrifty-ml, `EvalResult` exposes `proxy_f1`, `llm_f1`, `use_proxy`, and `holdout_size` after every run. You can tune `fallback_threshold` explicitly, inspect the trained sklearn/LightGBM object, check holdout predictions, or step through the pipeline in a notebook. The SQL surface hides all of this.
 
 **Integration with the Python ML ecosystem.** Because proxy models are sklearn or LightGBM objects, standard tooling applies directly — feature importances, calibration, cross-validation, SHAP explanations, model registries. None of that is available through a SQL function.
 
 **Iterative development workflow.** A data scientist iterating on a prompt or embedding model has a much tighter feedback loop in Python — run in a notebook, inspect the sample labels, check the proxy F1, adjust, re-run — versus having to push data to a warehouse, re-run a SQL query, and parse results from a table each iteration.
 
-The cost and latency wins described in the paper (300–1 000× reduction at 10M-row scale) transfer fully to frugal-ml because the underlying technique is identical. The difference is that frugal-ml makes those wins available without requiring a Google data warehouse.
+The cost and latency wins described in the paper (300–1 000× reduction at 10M-row scale) transfer fully to thrifty-ml because the underlying technique is identical. The difference is that thrifty-ml makes those wins available without requiring a Google data warehouse.

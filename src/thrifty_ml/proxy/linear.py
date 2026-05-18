@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import LinearSVC
 
-from frugal_ml.proxy.base import ProxyModel
+from thrifty_ml.proxy.base import ProxyModel
 
 
 class LogisticRegressionProxy(ProxyModel):

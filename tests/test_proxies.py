@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 from sklearn.metrics import f1_score
 
-from frugal_ml.proxy.linear import LinearSVCProxy, LogisticRegressionProxy
+from thrifty_ml.proxy.linear import LinearSVCProxy, LogisticRegressionProxy
 
 
 def _make_clusters(n: int = 500, dim: int = 384, seed: int = 0) -> tuple[np.ndarray, np.ndarray]:
@@ -45,7 +45,7 @@ def test_lgbm_f1(cluster_data):
         import lightgbm  # noqa: F401
     except (ImportError, OSError):
         pytest.skip("lightgbm not available (missing libomp or not installed)")
-    from frugal_ml.proxy.trees import LightGBMProxy
+    from thrifty_ml.proxy.trees import LightGBMProxy
     X, y = cluster_data
     split = len(X) * 4 // 5
     proxy = LightGBMProxy()
@@ -66,10 +66,10 @@ def test_lgbm_import_error_without_package():
     try:
         # Reload to clear cached imports within the module
         import importlib
-        import frugal_ml.proxy.trees as trees_mod
+        import thrifty_ml.proxy.trees as trees_mod
         importlib.reload(trees_mod)
-        from frugal_ml.proxy.trees import LightGBMProxy
-        with pytest.raises(ImportError, match="pip install frugal-ml"):
+        from thrifty_ml.proxy.trees import LightGBMProxy
+        with pytest.raises(ImportError, match="pip install thrifty-ml"):
             LightGBMProxy()
     finally:
         if lgb is not None:

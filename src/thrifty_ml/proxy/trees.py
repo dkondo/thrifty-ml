@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from frugal_ml.proxy.base import ProxyModel
+from thrifty_ml.proxy.base import ProxyModel
 
 
 class LightGBMProxy(ProxyModel):
@@ -12,7 +12,7 @@ class LightGBMProxy(ProxyModel):
         except (ImportError, OSError) as exc:
             raise ImportError(
                 "LightGBM is not installed or cannot load its native library. "
-                "Install it with: pip install frugal-ml[lgbm]"
+                "Install it with: pip install thrifty-ml[lgbm]"
             ) from exc
         self._lgb = lgb
         self._params = dict(
@@ -54,7 +54,7 @@ class LightGBMProxy(ProxyModel):
         except (ImportError, OSError) as exc:
             raise ImportError(
                 "LightGBM is not installed or cannot load its native library. "
-                "Install it with: pip install frugal-ml[lgbm]"
+                "Install it with: pip install thrifty-ml[lgbm]"
             ) from exc
         proxy = cls.__new__(cls)
         proxy._lgb = lgb

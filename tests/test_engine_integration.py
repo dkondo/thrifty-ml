@@ -64,7 +64,7 @@ def mock_litellm(monkeypatch):
 
 
 def test_ml_filter_full_pipeline(mock_litellm, tmp_path):
-    from frugal_ml import ml_filter
+    from thrifty_ml import ml_filter
 
     texts = (
         ["this is positive text"] * 50
@@ -93,7 +93,7 @@ def test_ml_filter_full_pipeline(mock_litellm, tmp_path):
 
 def test_cache_prevents_second_embed_call(mock_litellm, tmp_path):
     """Second run with same args and cache_dir should not re-embed."""
-    from frugal_ml import ml_filter
+    from thrifty_ml import ml_filter
 
     df = _make_df(50)
     kwargs = dict(
@@ -118,7 +118,7 @@ def test_cache_prevents_second_embed_call(mock_litellm, tmp_path):
 
 
 def test_ml_filter_output_length_matches_input(mock_litellm, tmp_path):
-    from frugal_ml import ml_filter
+    from thrifty_ml import ml_filter
 
     df = _make_df(80)
     mask = ml_filter(
@@ -154,7 +154,7 @@ def test_ml_classify_unknown_label(monkeypatch, tmp_path):
     monkeypatch.setattr("litellm.embedding", fake_embedding)
     monkeypatch.setattr("litellm.acompletion", fake_acompletion)
 
-    from frugal_ml import ml_classify
+    from thrifty_ml import ml_classify
 
     df = pd.DataFrame({"text": ["a", "b", "c", "d", "e"] * 4})
     labels = ml_classify(
@@ -174,7 +174,7 @@ def test_ml_classify_unknown_label(monkeypatch, tmp_path):
 def test_sample_size_exceeds_df_returns_llm_labels_directly(mock_litellm, tmp_path):
     """When sample_size >= len(df), entire df is labeled by LLM directly."""
     import warnings
-    from frugal_ml import ml_filter
+    from thrifty_ml import ml_filter
 
     df = pd.DataFrame({"text": ["positive text"] * 10})
     with warnings.catch_warnings(record=True) as w:
@@ -196,8 +196,8 @@ def test_sample_size_exceeds_df_returns_llm_labels_directly(mock_litellm, tmp_pa
 def test_custom_embedding_backend(monkeypatch, tmp_path):
     """Users can pass an EmbeddingBackend subclass instead of a model string."""
     import hashlib
-    from frugal_ml.embeddings import EmbeddingBackend
-    from frugal_ml import ml_filter
+    from thrifty_ml.embeddings import EmbeddingBackend
+    from thrifty_ml import ml_filter
 
     class DeterministicBackend(EmbeddingBackend):
         """Returns a deterministic embedding based on text content."""
@@ -254,7 +254,7 @@ def test_real_api_ml_filter():
     if not os.getenv("ANTHROPIC_API_KEY") or not os.getenv("OPENAI_API_KEY"):
         pytest.skip("Real API keys not available")
 
-    from frugal_ml import ml_filter
+    from thrifty_ml import ml_filter
 
     texts = (
         ["I loved this movie, brilliant cinematography!"] * 20

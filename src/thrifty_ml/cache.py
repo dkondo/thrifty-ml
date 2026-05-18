@@ -9,11 +9,11 @@ import diskcache
 from importlib.metadata import PackageNotFoundError, version as _pkg_version
 
 try:
-    _VERSION = _pkg_version("frugal-ml")
+    _VERSION = _pkg_version("thrifty-ml")
 except PackageNotFoundError:
     _VERSION = "dev"
 
-_DEFAULT_CACHE_DIR = Path.home() / ".cache" / "frugal_ml"
+_DEFAULT_CACHE_DIR = Path.home() / ".cache" / "thrifty_ml"
 _SHARDS = 8
 
 _CACHES: dict[Path, diskcache.FanoutCache] = {}
@@ -29,7 +29,7 @@ def _get_cache(cache_dir: Path) -> diskcache.FanoutCache:
 
 
 def _vkey(*parts: str) -> str:
-    return f"frugal_ml/{_VERSION}/" + "/".join(parts)
+    return f"thrifty_ml/{_VERSION}/" + "/".join(parts)
 
 
 def _sha256(text: str) -> str:

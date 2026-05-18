@@ -8,13 +8,13 @@ from typing import Any, Coroutine
 import numpy as np
 import pandas as pd
 
-from frugal_ml import embeddings as _emb
-from frugal_ml import llm as _llm
-from frugal_ml.embeddings import EmbeddingBackend, LiteLLMEmbeddingBackend
-from frugal_ml.evaluator import evaluate, train_holdout_split
-from frugal_ml.proxy.base import ProxyModel
-from frugal_ml.proxy.linear import LogisticRegressionProxy, LinearSVCProxy
-from frugal_ml.sampling import random_sample
+from thrifty_ml import embeddings as _emb
+from thrifty_ml import llm as _llm
+from thrifty_ml.embeddings import EmbeddingBackend, LiteLLMEmbeddingBackend
+from thrifty_ml.evaluator import evaluate, train_holdout_split
+from thrifty_ml.proxy.base import ProxyModel
+from thrifty_ml.proxy.linear import LogisticRegressionProxy, LinearSVCProxy
+from thrifty_ml.sampling import random_sample
 
 def _run_async(coro: Coroutine[Any, Any, Any]) -> Any:
     """Run a coroutine safely whether or not an event loop is already running.
@@ -55,7 +55,7 @@ _PROXY_REGISTRY: dict[str, type[ProxyModel]] = {
 
 def _get_proxy(name: str) -> ProxyModel:
     if name == "lgbm":
-        from frugal_ml.proxy.trees import LightGBMProxy
+        from thrifty_ml.proxy.trees import LightGBMProxy
         return LightGBMProxy()
     if name not in _PROXY_REGISTRY:
         raise ValueError(f"Unknown proxy '{name}'. Choose from: lr, svc, lgbm")
@@ -158,7 +158,7 @@ class Engine:
 
     def fit(self, df: pd.DataFrame, text_column: str) -> tuple[ProxyModel, "EvalResult"]:
         """Offline mode: fit proxy and return it without predicting remainder."""
-        from frugal_ml.evaluator import EvalResult
+        from thrifty_ml.evaluator import EvalResult
 
         if len(df) == 0:
             raise ValueError("Input DataFrame is empty.")

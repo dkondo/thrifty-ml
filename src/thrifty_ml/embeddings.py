@@ -6,7 +6,7 @@ from pathlib import Path
 
 import numpy as np
 
-from frugal_ml import cache as _cache
+from thrifty_ml import cache as _cache
 
 _CHUNK_SIZE = 2048
 _LARGE_DF_THRESHOLD = 250_000

@@ -1,4 +1,4 @@
-# frugal-ml
+# thrifty-ml
 
 Replace expensive per-row LLM calls with a lightweight ML classifier trained on your own data. Get the same answers at 100–1000× lower cost.
 
@@ -6,9 +6,9 @@ Replace expensive per-row LLM calls with a lightweight ML classifier trained on 
 
 You have a DataFrame with 100 000 rows. You want to filter or classify every row using an LLM prompt. Calling the LLM once per row is slow and expensive. At $0.25 / 1M input tokens and ~100 tokens per row, that's $2.50 — for a simple yes/no filter.
 
-## How frugal-ml solves it
+## How thrifty-ml solves it
 
-frugal-ml implements the [proxy model technique](https://arxiv.org/html/2603.15970v6) from Google Research (SIGMOD 2026):
+thrifty-ml implements the [proxy model technique](https://arxiv.org/html/2603.15970v6) from Google Research (SIGMOD 2026):
 
 1. **Sample** a small subset of rows (~1 000).
 2. **Label** the sample with the LLM — the only rows that ever touch the API.
@@ -24,10 +24,10 @@ On a 100 000-row dataset with `sample_size=1000`, you pay for 1 000 LLM calls in
 ## Installation
 
 ```bash
-pip install frugal-ml
+pip install thrifty-ml
 
 # For LightGBM support (non-linear proxy, better on hard tasks):
-pip install frugal-ml[lgbm]
+pip install thrifty-ml[lgbm]
 ```
 
 Requires Python ≥ 3.10. LLM and embedding calls go through [LiteLLM](https://github.com/BerriAI/litellm), so any provider works — Anthropic, OpenAI, Bedrock, Vertex, local Ollama, etc.
@@ -42,7 +42,7 @@ Keep rows that match a natural-language condition.
 
 ```python
 import pandas as pd
-from frugal_ml import ml_filter
+from thrifty_ml import ml_filter
 
 df = pd.read_parquet("reviews.parquet")
 
@@ -64,7 +64,7 @@ positive_reviews = df[mask]
 Assign each row to one of a fixed set of labels.
 
 ```python
-from frugal_ml import ml_classify
+from thrifty_ml import ml_classify
 
 labels = ml_classify(
     df,
@@ -96,7 +96,7 @@ Both `ml_filter` and `ml_classify` accept:
 | `sample_size` | `1000` | Number of rows to label with the LLM |
 | `fallback_threshold` | `0.1` | τ — if proxy F1 < 1.0 − τ, fall back to full LLM |
 | `max_concurrency` | `8` | Max simultaneous LLM API calls |
-| `cache_dir` | `~/.cache/frugal_ml/` | Override the embedding/label cache directory |
+| `cache_dir` | `~/.cache/thrifty_ml/` | Override the embedding/label cache directory |
 | `seed` | `None` | Random seed for reproducible sampling |
 
 ---
@@ -106,7 +106,7 @@ Both `ml_filter` and `ml_classify` accept:
 For recurring workloads, train the proxy once and reuse it without any LLM calls.
 
 ```python
-from frugal_ml import Proxy
+from thrifty_ml import Proxy
 
 # Train — labels a sample with the LLM, fits the proxy
 proxy = Proxy(
@@ -120,7 +120,7 @@ proxy.fit(train_df, text_column="review_text")
 proxy.save("sentiment_proxy.joblib")
 
 # Later — no LLM, no API key needed
-from frugal_ml import Proxy
+from thrifty_ml import Proxy
 proxy = Proxy.load("sentiment_proxy.joblib")
 labels = proxy.predict(new_df, text_column="review_text")
 ```
@@ -141,7 +141,7 @@ Pass any `EmbeddingBackend` subclass instead of a model string to use your own e
 
 ```python
 import numpy as np
-from frugal_ml import EmbeddingBackend, ml_filter
+from thrifty_ml import EmbeddingBackend, ml_filter
 
 class SentenceTransformerBackend(EmbeddingBackend):
     def __init__(self, model_name: str):
@@ -174,15 +174,15 @@ mask = ml_filter(
 |---|---|---|
 | Logistic Regression | `"lr"` | Default. Fast, interpretable, works well on modern embeddings. |
 | Linear SVM | `"svc"` | Similar to LR; sometimes better on very high-dimensional embeddings. |
-| LightGBM | `"lgbm"` | Best for non-linear tasks; requires `pip install frugal-ml[lgbm]`. |
+| LightGBM | `"lgbm"` | Best for non-linear tasks; requires `pip install thrifty-ml[lgbm]`. |
 
-The fallback threshold τ (`fallback_threshold=0.1`) controls quality vs cost. If the proxy's F1 on the holdout split is below `1.0 - τ`, frugal-ml warns you and falls back to labeling all rows with the LLM. Tighten τ (e.g. `0.05`) for higher accuracy requirements; loosen it (e.g. `0.2`) to force proxy use even when accuracy is lower.
+The fallback threshold τ (`fallback_threshold=0.1`) controls quality vs cost. If the proxy's F1 on the holdout split is below `1.0 - τ`, thrifty-ml warns you and falls back to labeling all rows with the LLM. Tighten τ (e.g. `0.05`) for higher accuracy requirements; loosen it (e.g. `0.2`) to force proxy use even when accuracy is lower.
 
 ---
 
 ## Caching
 
-Embeddings and LLM labels are cached automatically at `~/.cache/frugal_ml/` using [diskcache](https://grantjenks.com/docs/diskcache/). Re-running the same call with the same inputs costs nothing.
+Embeddings and LLM labels are cached automatically at `~/.cache/thrifty_ml/` using [diskcache](https://grantjenks.com/docs/diskcache/). Re-running the same call with the same inputs costs nothing.
 
 Cache keys include the model ID, prompt, and (for multiclass) the class list, so changing any of these triggers fresh calls.
 
@@ -195,12 +195,12 @@ mask = ml_filter(df, ..., cache_dir="./my_project_cache")
 
 ## CLI
 
-frugal-ml ships a CLI for use without writing Python.
+thrifty-ml ships a CLI for use without writing Python.
 
 ### Filter rows
 
 ```bash
-frugal-ml filter reviews.parquet \
+thrifty-ml filter reviews.parquet \
   --prompt "Is this a positive review?" \
   --text-col review_text \
   --out positive.parquet \
@@ -208,12 +208,12 @@ frugal-ml filter reviews.parquet \
   --embedding-model text-embedding-3-small
 ```
 
-Writes a parquet file containing only matching rows, with an added `_frugal_mask` column.
+Writes a parquet file containing only matching rows, with an added `_thrifty_mask` column.
 
 ### Classify rows
 
 ```bash
-frugal-ml classify tickets.csv \
+thrifty-ml classify tickets.csv \
   --prompt "Classify this support ticket by topic." \
   --text-col body \
   --classes "billing,technical,account,other" \
@@ -227,7 +227,7 @@ Appends a `label` column to the output file.
 ### Embed a column
 
 ```bash
-frugal-ml embed reviews.parquet \
+thrifty-ml embed reviews.parquet \
   --text-col review_text \
   --model text-embedding-3-small \
   --out embeddings.npy
@@ -238,7 +238,7 @@ Saves embeddings as a numpy `.npy` file.
 ### Label a sample
 
 ```bash
-frugal-ml label reviews.parquet \
+thrifty-ml label reviews.parquet \
   --prompt "Is this a positive review?" \
   --text-col review_text \
   --sample 1000 \
@@ -251,10 +251,10 @@ Labels a random sample and saves the results — useful for inspecting LLM outpu
 ### Clear the cache
 
 ```bash
-frugal-ml cache clear
+thrifty-ml cache clear
 
 # Clear a specific cache directory
-frugal-ml cache clear --cache-dir ./my_project_cache
+thrifty-ml cache clear --cache-dir ./my_project_cache
 ```
 
 ### Common CLI flags
@@ -278,7 +278,7 @@ Input files can be `.parquet`, `.csv`, `.json`, or `.jsonl`. Output format match
 
 ## When does the proxy get used?
 
-frugal-ml prints a warning and falls back to full LLM labeling if:
+thrifty-ml prints a warning and falls back to full LLM labeling if:
 
 - The labeled sample contains only one class (proxy can't learn anything).
 - The proxy F1 on the holdout split is below `1.0 - fallback_threshold`.
@@ -296,29 +296,29 @@ export ANTHROPIC_API_KEY=sk-ant-...
 export OPENAI_API_KEY=sk-...
 ```
 
-frugal-ml passes these through to LiteLLM, which supports all standard provider env vars. See the [LiteLLM docs](https://docs.litellm.ai/docs/providers) for the full list.
+thrifty-ml passes these through to LiteLLM, which supports all standard provider env vars. See the [LiteLLM docs](https://docs.litellm.ai/docs/providers) for the full list.
 
 ---
 
-## Appendix: frugal-ml vs BigQuery AI.IF and AlloyDB
+## Appendix: thrifty-ml vs BigQuery AI.IF and AlloyDB
 
-The proxy model technique was published in [arXiv 2603.15970](https://arxiv.org/html/2603.15970v6) and ships inside two Google products: `AI.IF` / `AI.LABEL` in BigQuery, and accelerated semantic functions in AlloyDB. The cost and latency wins are real — Google reports 300–1 000× improvement at 10M-row scale — but the implementation is locked inside Google's data warehouse SQL surface. frugal-ml ports the same technique to Python and removes every one of those constraints.
+The proxy model technique was published in [arXiv 2603.15970](https://arxiv.org/html/2603.15970v6) and ships inside two Google products: `AI.IF` / `AI.LABEL` in BigQuery, and accelerated semantic functions in AlloyDB. The cost and latency wins are real — Google reports 300–1 000× improvement at 10M-row scale — but the implementation is locked inside Google's data warehouse SQL surface. thrifty-ml ports the same technique to Python and removes every one of those constraints.
 
 ### No infrastructure dependency
 
-BigQuery and AlloyDB require your data to be in GCP, a billing account, and IAM setup. frugal-ml works on a local pandas DataFrame, a parquet file, or a CSV — on your laptop, in a notebook, in a CI job, or in any Python environment. No cloud account required.
+BigQuery and AlloyDB require your data to be in GCP, a billing account, and IAM setup. thrifty-ml works on a local pandas DataFrame, a parquet file, or a CSV — on your laptop, in a notebook, in a CI job, or in any Python environment. No cloud account required.
 
 ### Any LLM and any embedding provider
 
-Google's products are wired to Vertex AI and Gemini models. frugal-ml uses [LiteLLM](https://docs.litellm.ai/docs/providers) as an adapter, so the same API works with Anthropic, OpenAI, AWS Bedrock, Google Vertex, Azure OpenAI, a local Ollama instance, or any other provider. You can also bring your own embeddings via the `EmbeddingBackend` ABC — pre-computed vectors, a fine-tuned sentence-transformer, a proprietary model — without touching the rest of the pipeline.
+Google's products are wired to Vertex AI and Gemini models. thrifty-ml uses [LiteLLM](https://docs.litellm.ai/docs/providers) as an adapter, so the same API works with Anthropic, OpenAI, AWS Bedrock, Google Vertex, Azure OpenAI, a local Ollama instance, or any other provider. You can also bring your own embeddings via the `EmbeddingBackend` ABC — pre-computed vectors, a fine-tuned sentence-transformer, a proprietary model — without touching the rest of the pipeline.
 
 ### Deploy-once offline mode
 
-In BigQuery and AlloyDB, the sample-label-train pipeline reruns on every query. frugal-ml's `Proxy` class separates training from inference: fit once, serialize to disk, deploy the classifier wherever you need it. Subsequent `predict()` calls make zero LLM API calls and run at classifier speed (~0.1 ms / 1 000 rows for logistic regression). This matters for production pipelines where you want a stable, versioned model — not one that retrains on every invocation.
+In BigQuery and AlloyDB, the sample-label-train pipeline reruns on every query. thrifty-ml's `Proxy` class separates training from inference: fit once, serialize to disk, deploy the classifier wherever you need it. Subsequent `predict()` calls make zero LLM API calls and run at classifier speed (~0.1 ms / 1 000 rows for logistic regression). This matters for production pipelines where you want a stable, versioned model — not one that retrains on every invocation.
 
 ### Full observability
 
-Inside a SQL function you cannot inspect intermediate state. frugal-ml exposes everything:
+Inside a SQL function you cannot inspect intermediate state. thrifty-ml exposes everything:
 
 - `EvalResult.proxy_f1` — the holdout F1 score that drove the fallback decision
 - `EvalResult.use_proxy` — whether the proxy was used or the LLM fell back
@@ -333,8 +333,8 @@ Because proxy models are sklearn or LightGBM objects, the full Python ML toolcha
 
 ### Tighter iteration loop
 
-A data scientist tuning a prompt or trying a different embedding model gets immediate feedback in a notebook: run the cell, inspect the sample labels, check the proxy F1, adjust, re-run. The BigQuery equivalent is: upload data to a warehouse, write a SQL query, wait for a query job to complete, inspect a result table — then repeat. frugal-ml collapses that loop to seconds.
+A data scientist tuning a prompt or trying a different embedding model gets immediate feedback in a notebook: run the cell, inspect the sample labels, check the proxy F1, adjust, re-run. The BigQuery equivalent is: upload data to a warehouse, write a SQL query, wait for a query job to complete, inspect a result table — then repeat. thrifty-ml collapses that loop to seconds.
 
 ### The wins transfer
 
-The 300–1 000× cost reduction reported in the paper comes from the proxy technique itself, not from BigQuery. frugal-ml uses the identical algorithm — random sampling, embedding-based proxy, holdout F1 evaluation, τ-threshold fallback — so the same efficiency gains apply to any DataFrame workload, without a Google account.
+The 300–1 000× cost reduction reported in the paper comes from the proxy technique itself, not from BigQuery. thrifty-ml uses the identical algorithm — random sampling, embedding-based proxy, holdout F1 evaluation, τ-threshold fallback — so the same efficiency gains apply to any DataFrame workload, without a Google account.

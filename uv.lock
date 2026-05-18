@@ -571,7 +571,7 @@ wheels = [
 ]
 
 [[package]]
-name = "frugal-ml"
+name = "thrifty-ml"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

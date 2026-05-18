@@ -5,7 +5,7 @@ from typing import Optional
 
 import typer
 
-app = typer.Typer(help="frugal-ml: proxy-model library CLI", no_args_is_help=True)
+app = typer.Typer(help="thrifty-ml: proxy-model library CLI", no_args_is_help=True)
 
 
 def _load_df(input_path: Path) -> "pd.DataFrame":
@@ -44,7 +44,7 @@ def filter(
 ) -> None:
     """Filter rows based on a natural-language prompt."""
     import numpy as np
-    from frugal_ml import ml_filter
+    from thrifty_ml import ml_filter
 
     df = _load_df(input)
     typer.echo(f"Loaded {len(df)} rows from {input}")
@@ -64,7 +64,7 @@ def filter(
     )
 
     result = df[mask].copy()
-    result["_frugal_mask"] = True
+    result["_thrifty_mask"] = True
     _save_df(result, out)
     typer.echo(f"Filtered to {mask.sum()} / {len(df)} rows → {out}")
 
@@ -86,7 +86,7 @@ def classify(
     seed: Optional[int] = typer.Option(None, "--seed"),
 ) -> None:
     """Classify rows into named classes using a natural-language prompt."""
-    from frugal_ml import ml_classify
+    from thrifty_ml import ml_classify
 
     class_list = [c.strip() for c in classes.split(",")]
     df = _load_df(input)
@@ -123,7 +123,7 @@ def embed(
 ) -> None:
     """Embed a text column and save as .npy."""
     import numpy as np
-    from frugal_ml.embeddings import embed_texts, LiteLLMEmbeddingBackend
+    from thrifty_ml.embeddings import embed_texts, LiteLLMEmbeddingBackend
 
     df = _load_df(input)
     typer.echo(f"Embedding {len(df)} texts with {model}...")
@@ -147,8 +147,8 @@ def label(
 ) -> None:
     """LLM-label a sample of rows and save labels."""
     import asyncio
-    from frugal_ml import llm as _llm
-    from frugal_ml.sampling import random_sample
+    from thrifty_ml import llm as _llm
+    from thrifty_ml.sampling import random_sample
 
     df = _load_df(input)
     sample_df, _ = random_sample(df, sample_size, seed)
@@ -176,7 +176,7 @@ def cache_clear(
     cache_dir: Optional[Path] = typer.Option(None, "--cache-dir"),
 ) -> None:
     """Clear the embedding and label cache."""
-    from frugal_ml.cache import clear_cache
+    from thrifty_ml.cache import clear_cache
     count = clear_cache(cache_dir)
     typer.echo(f"Cleared {count} cache entries.")
 
