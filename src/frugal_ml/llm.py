@@ -71,6 +71,10 @@ async def _label_one(
             temperature=0,
         )
         raw = response.choices[0].message.content or "{}"
+        # Some models wrap the JSON in markdown fences despite json_object mode.
+        raw = raw.strip()
+        if raw.startswith("```"):
+            raw = raw.split("\n", 1)[-1].rsplit("```", 1)[0].strip()
         parsed = json.loads(raw)
         label_val = parsed.get("label")
 
