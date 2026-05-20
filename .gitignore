@@ -216,3 +216,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Benchmark outputs
+benchmarks/imdb/results*.json
+benchmarks/imdb/.cache_*/
+
+# Claude Code
+.claude/

@@ -20,6 +20,7 @@ dependencies = [
 
 [project.optional-dependencies]
 lgbm = ["lightgbm>=4.3.0"]
+benchmark = ["datasets>=2.16.0", "pyarrow>=14.0.0", "tqdm>=4.66.0"]
 dev = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
