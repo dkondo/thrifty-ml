@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "thrifty-ml"
-version = "0.1.0"
+version = "0.1.1"
 description = "Proxy-model library: replace per-row LLM calls with lightweight ML classifiers"
 license = { text = "MIT" }
 readme = "README.md"
@@ -58,6 +58,3 @@ packages = ["src/thrifty_ml"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 markers = ["integration: requires real API keys, not run in CI"]
-
-[tool.hatch.build]
-sources = ["src"]
