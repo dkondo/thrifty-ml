@@ -6,8 +6,26 @@ build-backend = "hatchling.build"
 name = "thrifty-ml"
 version = "0.1.0"
 description = "Proxy-model library: replace per-row LLM calls with lightweight ML classifiers"
+license = { text = "MIT" }
 readme = "README.md"
+authors = [
+    { name = "Derrick Kondo" },
+]
 requires-python = ">=3.10"
+keywords = ["llm", "machine-learning", "proxy-model", "classification", "cost-reduction", "litellm"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 dependencies = [
     "litellm>=1.40.0",
     "scikit-learn>=1.4.0",
@@ -26,6 +44,10 @@ dev = [
     "pytest-asyncio>=0.23.0",
     "lightgbm>=4.3.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/dkondo/thrifty-ml"
+Repository = "https://github.com/dkondo/thrifty-ml"
 
 [project.scripts]
 thrifty-ml = "thrifty_ml.cli:app"
