@@ -8,7 +8,7 @@ You have a DataFrame with 100 000 rows. You want to filter or classify every row
 
 ## How thrifty-ml solves it
 
-thrifty-ml implements the [proxy model technique](https://arxiv.org/html/2603.15970v6) from Google Research (SIGMOD 2026):
+thrifty-ml implements the proxy model technique from ["100x Cost & Latency Reduction: Performance Analysis of AI Query Approximation using Lightweight Proxy Models"](https://arxiv.org/html/2603.15970v6) (Google Research, SIGMOD 2026):
 
 1. **Sample** a small subset of rows (~1 000).
 2. **Label** the sample with the LLM — the only rows that ever touch the API.
@@ -360,7 +360,7 @@ thrifty-ml passes these through to LiteLLM, which supports all standard provider
 
 ## Validation: parity with the SIGMOD 2026 paper
 
-The proxy-model technique was independently validated against the benchmark in [arXiv 2603.15970](https://arxiv.org/html/2603.15970v6) (SIGMOD 2026) using the Stanford IMDB sentiment dataset — the paper's primary use case (movie review classification).
+The proxy-model technique was independently validated against the benchmark in ["100x Cost & Latency Reduction: Performance Analysis of AI Query Approximation using Lightweight Proxy Models"](https://arxiv.org/html/2603.15970v6) (Google Research, SIGMOD 2026) using the Stanford IMDB sentiment dataset — the paper's primary use case (movie review classification).
 
 **Setup:** 50 000 IMDB reviews, `sample_size=1000`, logistic regression proxy, `anthropic/claude-haiku-4-5` + `text-embedding-3-small`.
 
@@ -386,7 +386,7 @@ The full benchmark is in [`benchmarks/imdb/`](benchmarks/imdb/) and is runnable 
 
 ## Appendix: thrifty-ml vs BigQuery AI.IF and AlloyDB
 
-The proxy model technique was published in [arXiv 2603.15970](https://arxiv.org/html/2603.15970v6) and ships inside two Google products: `AI.IF` / `AI.LABEL` in BigQuery, and accelerated semantic functions in AlloyDB. The cost and latency wins are real — Google reports 300–1 000× improvement at 10M-row scale — but the implementation is locked inside Google's data warehouse SQL surface. thrifty-ml ports the same technique to Python and removes every one of those constraints.
+The proxy model technique was published in ["100x Cost & Latency Reduction: Performance Analysis of AI Query Approximation using Lightweight Proxy Models"](https://arxiv.org/html/2603.15970v6) (Google Research, SIGMOD 2026) and ships inside two Google products: `AI.IF` / `AI.LABEL` in BigQuery, and accelerated semantic functions in AlloyDB. The cost and latency wins are real — Google reports 300–1 000× improvement at 10M-row scale — but the implementation is locked inside Google's data warehouse SQL surface. thrifty-ml ports the same technique to Python and removes every one of those constraints.
 
 ### No infrastructure dependency
 
