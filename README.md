@@ -1,6 +1,6 @@
 # thrifty-ml
 
-Replace expensive per-row LLM calls with a lightweight ML classifier trained on your own data. Get the same answers at 100× or more lower cost.
+Replace expensive per-row LLM calls with a lightweight ML classifier trained on your own data. Get the same answers more than 100× cheaper and faster.
 
 ## The problem
 
