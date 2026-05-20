@@ -8,7 +8,7 @@ import numpy as np
 
 from thrifty_ml import cache as _cache
 
-_CHUNK_SIZE = 512
+_CHUNK_SIZE = 100
 _LARGE_DF_THRESHOLD = 250_000
 
 
@@ -43,12 +43,20 @@ class LiteLLMEmbeddingBackend(EmbeddingBackend):
         return self._model
 
     def embed(self, texts: list[str]) -> np.ndarray:
+        import time
         import litellm
 
         results: list[np.ndarray] = []
         for start in range(0, len(texts), _CHUNK_SIZE):
             chunk = texts[start : start + _CHUNK_SIZE]
-            response = litellm.embedding(model=self._model, input=chunk)
+            for attempt in range(6):
+                try:
+                    response = litellm.embedding(model=self._model, input=chunk)
+                    break
+                except litellm.exceptions.RateLimitError:
+                    if attempt == 5:
+                        raise
+                    time.sleep(2 ** attempt)
             for item in response.data:
                 results.append(np.array(item["embedding"], dtype=np.float32))
         return np.array(results, dtype=np.float32)

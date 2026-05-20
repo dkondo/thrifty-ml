@@ -6,7 +6,7 @@ from typing import Any, Awaitable, Callable, TypeVar
 
 T = TypeVar("T")
 
-_DEFAULT_RETRY_DELAYS = (1.0, 2.0, 4.0)
+_DEFAULT_RETRY_DELAYS = (5.0, 15.0, 30.0, 60.0, 120.0)
 _RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
 
 

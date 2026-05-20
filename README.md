@@ -1,6 +1,6 @@
 # thrifty-ml
 
-Replace expensive per-row LLM calls with a lightweight ML classifier trained on your own data. Get the same answers at 100–1000× lower cost.
+Replace expensive per-row LLM calls with a lightweight ML classifier trained on your own data. Get the same answers at 100× or more lower cost.
 
 ## The problem
 
@@ -41,8 +41,8 @@ mask = ml_filter(
     df,
     prompt="Is this a positive movie review?",
     text_column="text",
-    llm="anthropic/claude-haiku-4-5",
-    embedding_model="text-embedding-3-small",
+    llm="openai/gpt-4o-mini",
+    embedding_model="openai/text-embedding-3-large",
 )
 
 print(df[mask])
@@ -57,8 +57,8 @@ df["topic"] = ml_classify(
     df,
     prompt="Classify this support ticket by topic.",
     text_column="body",
-    llm="anthropic/claude-haiku-4-5",
-    embedding_model="text-embedding-3-small",
+    llm="openai/gpt-4o-mini",
+    embedding_model="openai/text-embedding-3-large",
     classes=["billing", "technical", "account", "other"],
 )
 ```
@@ -70,8 +70,8 @@ thrifty-ml filter examples/reviews.csv \
   --prompt "Is this a positive movie review?" \
   --text-col text \
   --out positive.csv \
-  --llm anthropic/claude-haiku-4-5 \
-  --embedding-model text-embedding-3-small \
+  --llm openai/gpt-4o-mini \
+  --embedding-model openai/text-embedding-3-large \
   --sample-size 20
 ```
 
@@ -108,8 +108,8 @@ mask = ml_filter(
     df,
     prompt="Is this a positive review?",
     text_column="review_text",
-    llm="anthropic/claude-haiku-4-5",
-    embedding_model="text-embedding-3-small",
+    llm="openai/gpt-4o-mini",
+    embedding_model="openai/text-embedding-3-large",
 )
 
 positive_reviews = df[mask]
@@ -128,8 +128,8 @@ labels = ml_classify(
     df,
     prompt="Classify this support ticket by topic.",
     text_column="body",
-    llm="anthropic/claude-haiku-4-5",
-    embedding_model="text-embedding-3-small",
+    llm="openai/gpt-4o-mini",
+    embedding_model="openai/text-embedding-3-large",
     classes=["billing", "technical", "account", "other"],
 )
 
@@ -147,7 +147,7 @@ Both `ml_filter` and `ml_classify` accept:
 | `df` | required | Input DataFrame |
 | `prompt` | required | Natural-language instruction for the LLM |
 | `text_column` | required | Column name containing text to evaluate |
-| `llm` | required | LiteLLM model string (e.g. `"anthropic/claude-haiku-4-5"`) |
+| `llm` | required | LiteLLM model string (e.g. `"openai/gpt-4o-mini"`) |
 | `embedding_model` | required | LiteLLM embedding model string, or a custom `EmbeddingBackend` |
 | `classes` | — | List of class labels (`ml_classify` only) |
 | `proxy` | `"lr"` | Proxy model type: `"lr"`, `"svc"`, or `"lgbm"` |
@@ -169,8 +169,8 @@ from thrifty_ml import Proxy
 # Train — labels a sample with the LLM, fits the proxy
 proxy = Proxy(
     prompt="Is this a positive review?",
-    llm="anthropic/claude-haiku-4-5",
-    embedding_model="text-embedding-3-small",
+    llm="openai/gpt-4o-mini",
+    embedding_model="openai/text-embedding-3-large",
     model="lgbm",         # "lr" | "svc" | "lgbm"
     sample_size=2000,
 )
@@ -217,7 +217,7 @@ mask = ml_filter(
     df,
     prompt="Is this relevant?",
     text_column="text",
-    llm="anthropic/claude-haiku-4-5",
+    llm="openai/gpt-4o-mini",
     embedding_model=SentenceTransformerBackend("all-MiniLM-L6-v2"),
 )
 ```
@@ -262,8 +262,8 @@ thrifty-ml filter reviews.parquet \
   --prompt "Is this a positive review?" \
   --text-col review_text \
   --out positive.parquet \
-  --llm anthropic/claude-haiku-4-5 \
-  --embedding-model text-embedding-3-small
+  --llm openai/gpt-4o-mini \
+  --embedding-model openai/text-embedding-3-large
 ```
 
 Writes a parquet file containing only matching rows, with an added `_thrifty_mask` column.
@@ -276,8 +276,8 @@ thrifty-ml classify tickets.csv \
   --text-col body \
   --classes "billing,technical,account,other" \
   --out classified.csv \
-  --llm anthropic/claude-haiku-4-5 \
-  --embedding-model text-embedding-3-small
+  --llm openai/gpt-4o-mini \
+  --embedding-model openai/text-embedding-3-large
 ```
 
 Appends a `label` column to the output file.
@@ -287,7 +287,7 @@ Appends a `label` column to the output file.
 ```bash
 thrifty-ml embed reviews.parquet \
   --text-col review_text \
-  --model text-embedding-3-small \
+  --model openai/text-embedding-3-large \
   --out embeddings.npy
 ```
 
@@ -301,7 +301,7 @@ thrifty-ml label reviews.parquet \
   --text-col review_text \
   --sample 1000 \
   --out labels.csv \
-  --llm anthropic/claude-haiku-4-5
+  --llm openai/gpt-4o-mini
 ```
 
 Labels a random sample and saves the results — useful for inspecting LLM outputs before running a full pipeline.
@@ -321,8 +321,8 @@ All commands accept:
 
 | Flag | Default | Description |
 |---|---|---|
-| `--llm` | `anthropic/claude-haiku-4-5` | LiteLLM model string |
-| `--embedding-model` | `text-embedding-3-small` | LiteLLM embedding model string |
+| `--llm` | `openai/gpt-4o-mini` | LiteLLM model string |
+| `--embedding-model` | `openai/text-embedding-3-large` | LiteLLM embedding model string |
 | `--proxy` | `lr` | Proxy type: `lr`, `svc`, `lgbm` |
 | `--sample-size` | `1000` | Rows to label with the LLM |
 | `--fallback-threshold` | `0.1` | τ quality threshold |
@@ -350,7 +350,6 @@ In both cases you still get correct labels — just at full LLM cost for that ru
 Set API keys for your chosen providers:
 
 ```bash
-export ANTHROPIC_API_KEY=sk-ant-...
 export OPENAI_API_KEY=sk-...
 ```
 
@@ -362,23 +361,23 @@ thrifty-ml passes these through to LiteLLM, which supports all standard provider
 
 The proxy-model technique was independently validated against the benchmark in ["100x Cost & Latency Reduction: Performance Analysis of AI Query Approximation using Lightweight Proxy Models"](https://arxiv.org/html/2603.15970v6) (Google Research, SIGMOD 2026) using the Stanford IMDB sentiment dataset — the paper's primary use case (movie review classification).
 
-**Setup:** 50 000 IMDB reviews, `sample_size=1000`, logistic regression proxy, `anthropic/claude-haiku-4-5` + `text-embedding-3-small`.
+**Setup:** 50 000 IMDB reviews, `sample_size=1000`, logistic regression proxy, `openai/gpt-4o-mini` + `openai/text-embedding-3-large`.
 
 | Metric | Observed | Paper target |
 |---|---|---|
-| F1 (proxy vs LLM) | **0.910** | ≥ 0.9 |
-| F1 (LLM vs gold labels) | **0.961** | — |
-| F1 (proxy vs gold labels) | **0.932** | — |
-| Relative accuracy | **0.971** | 0.90–1.05 |
+| F1 (proxy vs LLM) | **0.964** | ≥ 0.9 |
+| F1 (LLM vs gold labels) | **0.939** | — |
+| F1 (proxy vs gold labels) | **0.953** | — |
+| Relative accuracy | **1.015** | 0.90–1.05 |
 | Token reduction | **50×** | ~50× at 2% sample ratio |
-| Speedup | **29.5×** | — |
+| Speedup | **21.8×** | — |
 | Fallback triggered | **No** | — |
 
 **What this means:**
 
-- The proxy classifier (trained on 1 000 LLM-labeled examples) matched LLM output with F1 = 0.910, clearing the paper's ≥ 0.9 threshold. The remainder of the 50 000 rows was predicted by the proxy with zero additional LLM calls.
-- Relative accuracy of 0.971 means the proxy's predictions against the human gold labels are 97.1% as good as the LLM's own predictions — within the paper's reported 0.90–1.05 band.
-- Token reduction of 50× is measured directly: 341 005 tokens used vs 17 050 250 tokens projected for full LLM labeling.
+- The proxy classifier (trained on 1 000 LLM-labeled examples) matched LLM output with F1 = 0.964, well above the paper's ≥ 0.9 threshold. The remainder of the 50 000 rows was predicted by the proxy with zero additional LLM calls.
+- Relative accuracy of 1.015 means the proxy's predictions against the human gold labels are slightly better than the LLM's own predictions — within the paper's reported 0.90–1.05 band.
+- Token reduction of 50× is measured directly: 331 341 tokens used vs 16 567 050 tokens projected for full LLM labeling.
 
 The full benchmark is in [`benchmarks/imdb/`](benchmarks/imdb/) and is runnable independently. Provider differs from the paper's Gemini/Gecko baseline; the accuracy ratios and cost reduction hold regardless of provider.
 
@@ -386,7 +385,7 @@ The full benchmark is in [`benchmarks/imdb/`](benchmarks/imdb/) and is runnable 
 
 ## Appendix: thrifty-ml vs BigQuery AI.IF and AlloyDB
 
-The proxy model technique was published in ["100x Cost & Latency Reduction: Performance Analysis of AI Query Approximation using Lightweight Proxy Models"](https://arxiv.org/html/2603.15970v6) (Google Research, SIGMOD 2026) and ships inside two Google products: `AI.IF` / `AI.LABEL` in BigQuery, and accelerated semantic functions in AlloyDB. The cost and latency wins are real — Google reports 300–1 000× improvement at 10M-row scale — but the implementation is locked inside Google's data warehouse SQL surface. thrifty-ml ports the same technique to Python and removes every one of those constraints.
+The proxy model technique was published in ["100x Cost & Latency Reduction: Performance Analysis of AI Query Approximation using Lightweight Proxy Models"](https://arxiv.org/html/2603.15970v6) (Google Research, SIGMOD 2026) and ships inside two Google products: `AI.IF` / `AI.LABEL` in BigQuery, and accelerated semantic functions in AlloyDB. The cost and latency wins are real — Google reports 100× or more improvement, reaching ~1 000× on 10M-row tables with pre-computed embeddings — but the implementation is locked inside Google's data warehouse SQL surface. thrifty-ml ports the same technique to Python and removes every one of those constraints.
 
 ### No infrastructure dependency
 
@@ -421,4 +420,4 @@ A data scientist tuning a prompt or trying a different embedding model gets imme
 
 ### The wins transfer
 
-The 300–1 000× cost reduction reported in the paper comes from the proxy technique itself, not from BigQuery. thrifty-ml uses the identical algorithm — random sampling, embedding-based proxy, holdout F1 evaluation, τ-threshold fallback — so the same efficiency gains apply to any DataFrame workload, without a Google account.
+The 100× or more cost reduction reported in the paper comes from the proxy technique itself, not from BigQuery. thrifty-ml uses the identical algorithm — random sampling, embedding-based proxy, holdout F1 evaluation, τ-threshold fallback — so the same efficiency gains apply to any DataFrame workload, without a Google account.

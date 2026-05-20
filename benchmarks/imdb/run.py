@@ -179,8 +179,8 @@ def write_json(metrics: dict, path: Path) -> None:
 
 @app.command()
 def main(
-    llm: str = typer.Option("anthropic/claude-haiku-4-5", help="LiteLLM model string"),
-    embedding_model: str = typer.Option("text-embedding-3-small", help="LiteLLM embedding model"),
+    llm: str = typer.Option("openai/gpt-4o-mini", help="LiteLLM model string"),
+    embedding_model: str = typer.Option("openai/text-embedding-3-large", help="LiteLLM embedding model"),
     proxy: str = typer.Option("lr", help="Proxy type: lr, svc, lgbm"),
     sample_size: int = typer.Option(1000, help="Rows to label with the LLM"),
     rows: Optional[int] = typer.Option(None, help="Total rows (None = full 50k)"),
