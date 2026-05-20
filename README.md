@@ -71,7 +71,8 @@ thrifty-ml filter examples/reviews.csv \
   --text-col text \
   --out positive.csv \
   --llm anthropic/claude-haiku-4-5 \
-  --embedding-model text-embedding-3-small
+  --embedding-model text-embedding-3-small \
+  --sample-size 20
 ```
 
 Both calls label a small sample with the LLM (~1 000 rows by default), train a classifier on the results, and predict the rest — without any additional LLM calls.
