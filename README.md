@@ -300,6 +300,32 @@ thrifty-ml passes these through to LiteLLM, which supports all standard provider
 
 ---
 
+## Validation: parity with the SIGMOD 2026 paper
+
+The proxy-model technique was independently validated against the benchmark in [arXiv 2603.15970](https://arxiv.org/html/2603.15970v6) (SIGMOD 2026) using the Stanford IMDB sentiment dataset — the paper's primary use case (movie review classification).
+
+**Setup:** 50 000 IMDB reviews, `sample_size=1000`, logistic regression proxy, `anthropic/claude-haiku-4-5` + `text-embedding-3-small`.
+
+| Metric | Observed | Paper target |
+|---|---|---|
+| F1 (proxy vs LLM) | **0.910** | ≥ 0.9 |
+| F1 (LLM vs gold labels) | **0.961** | — |
+| F1 (proxy vs gold labels) | **0.932** | — |
+| Relative accuracy | **0.971** | 0.90–1.05 |
+| Token reduction | **50×** | ~50× at 2% sample ratio |
+| Speedup | **29.5×** | — |
+| Fallback triggered | **No** | — |
+
+**What this means:**
+
+- The proxy classifier (trained on 1 000 LLM-labeled examples) matched LLM output with F1 = 0.910, clearing the paper's ≥ 0.9 threshold. The remainder of the 50 000 rows was predicted by the proxy with zero additional LLM calls.
+- Relative accuracy of 0.971 means the proxy's predictions against the human gold labels are 97.1% as good as the LLM's own predictions — within the paper's reported 0.90–1.05 band.
+- Token reduction of 50× is measured directly: 341 005 tokens used vs 17 050 250 tokens projected for full LLM labeling.
+
+The full benchmark is in [`benchmarks/imdb/`](benchmarks/imdb/) and is runnable independently. Provider differs from the paper's Gemini/Gecko baseline; the accuracy ratios and cost reduction hold regardless of provider.
+
+---
+
 ## Appendix: thrifty-ml vs BigQuery AI.IF and AlloyDB
 
 The proxy model technique was published in [arXiv 2603.15970](https://arxiv.org/html/2603.15970v6) and ships inside two Google products: `AI.IF` / `AI.LABEL` in BigQuery, and accelerated semantic functions in AlloyDB. The cost and latency wins are real — Google reports 300–1 000× improvement at 10M-row scale — but the implementation is locked inside Google's data warehouse SQL surface. thrifty-ml ports the same technique to Python and removes every one of those constraints.
