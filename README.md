@@ -21,6 +21,63 @@ On a 100 000-row dataset with `sample_size=1000`, you pay for 1 000 LLM calls in
 
 ---
 
+## Quick start
+
+```bash
+pip install thrifty-ml
+export ANTHROPIC_API_KEY=sk-ant-...
+export OPENAI_API_KEY=sk-...
+```
+
+**Filter rows** — keep only the ones that match a condition:
+
+```python
+import pandas as pd
+from thrifty_ml import ml_filter
+
+df = pd.read_csv("reviews.csv")
+
+mask = ml_filter(
+    df,
+    prompt="Is this a positive movie review?",
+    text_column="text",
+    llm="anthropic/claude-haiku-4-5",
+    embedding_model="text-embedding-3-small",
+)
+
+print(df[mask])
+```
+
+**Classify rows** — assign each row to a category:
+
+```python
+from thrifty_ml import ml_classify
+
+df["topic"] = ml_classify(
+    df,
+    prompt="Classify this support ticket by topic.",
+    text_column="body",
+    llm="anthropic/claude-haiku-4-5",
+    embedding_model="text-embedding-3-small",
+    classes=["billing", "technical", "account", "other"],
+)
+```
+
+**Or use the CLI** — no Python required:
+
+```bash
+thrifty-ml filter examples/reviews.csv \
+  --prompt "Is this a positive movie review?" \
+  --text-col text \
+  --out positive.csv \
+  --llm anthropic/claude-haiku-4-5 \
+  --embedding-model text-embedding-3-small
+```
+
+Both calls label a small sample with the LLM (~1 000 rows by default), train a classifier on the results, and predict the rest — without any additional LLM calls.
+
+---
+
 ## Installation
 
 ```bash
